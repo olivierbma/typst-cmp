@@ -1,8 +1,7 @@
 local M = {}
 
-local deps = require('plugins.typst-cmp.lua.dependencies')
-local cmp = require 'cmp'
-local luasnip = require 'luasnip'
+local deps = require('typst-cmp.dependencies')
+local cmp = require('cmp')
 local ls = require('luasnip')
 local s = ls.snippet
 local sn = ls.snippet_node
