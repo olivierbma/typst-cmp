@@ -33,11 +33,9 @@ local k = require('luasnip.nodes.key_indexer').new_key
 
 
 function M.setup()
-  local buffer = deps.buffer_to_string()
-  local dependencies = deps.get_imports(buffer)
+  local dependencies = deps.get_imports()
 
 
-  local lsnip_table = {}
 
   for index, value in ipairs(dependencies) do
     local snipps = M.get_functions(value)
@@ -174,6 +172,10 @@ end
 function M.get_functions(path)
   local file = deps.read_file(path)
   local functions = {}
+
+  if file == nil then
+    return {}
+  end
 
   for match in string.gmatch(file, '%s*#let%s*[%C]+') do
     match = string.gsub(match, "%s*=%s*%C*$", '')

@@ -1,25 +1,65 @@
 local deps = {}
 
+local imports = {}
 
 function deps.buffer_to_string()
   local content = vim.api.nvim_buf_get_lines(0, 0, -1, false)
   return table.concat(content, '\n')
 end
 
-function deps.get_imports(buffr)
+function deps.get_imports()
+  deps.recursive_imports(vim.fn.expand('%:p'))
+
+  local hash = {}
+  local res = {}
+  for _, v in ipairs(imports) do
+    if (not hash[v]) then
+      res[#res + 1] = v -- you could print here instead of saving to result table if you wanted
+      hash[v] = true
+    end
+  end
+
+  return res
+end
+
+function deps.get_imports_from_file(file_path)
   local pattern_reg = "#import%s?\"%g+\":"
   local import_reg = "%b\"\""
 
   local imports_table = {}
 
+  local buffr = deps.read_file(file_path)
+  if buffr == nil then
+    return {}
+  end
   for pattern in string.gmatch(buffr, pattern_reg) do
     for import in string.gmatch(pattern, import_reg) do
       import = string.gsub(import, "[\"]", "")
       table.insert(imports_table, deps.get_full_path(import))
     end
   end
-
   return imports_table
+end
+
+function deps.recursive_imports(import_str)
+  local iter_imports = {}
+  if import_str ~= nil then
+    iter_imports = deps.get_imports_from_file(import_str)
+
+    imports = deps.concat_tables(imports, iter_imports)
+    for _, lvalue in pairs(iter_imports) do
+      deps.recursive_imports(lvalue)
+    end
+  end
+end
+
+function deps.concat_tables(t1, t2)
+  if t1 ~= nil and t2 ~= nil then
+    for i = 1, #t2 do
+      t1[#t1 + 1] = t2[i]
+    end
+  end
+  return t1
 end
 
 --- determine if package is global or a relative path
