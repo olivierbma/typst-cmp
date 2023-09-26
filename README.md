@@ -30,3 +30,4 @@ require('typst-cmp').setup()
 - [ ] Support for `#import "@preview/test:0.1.1": *`
 - [ ] Better support of partial imports (right now `#import "@preview/test:0.1.1": foo` is treated as `#import "@preview/test:0.1.1": *`
 - [ ] Async loading and parsing of files
+- [ ] Auto update snippets on file changes
