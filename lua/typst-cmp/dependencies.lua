@@ -19,7 +19,9 @@ function deps.get_imports()
     end
   end
 
-  return res
+  imports = res
+
+  return imports
 end
 
 function deps.get_imports_from_file(file_path)
