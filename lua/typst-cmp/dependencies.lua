@@ -2,11 +2,15 @@ local deps = {}
 
 local imports = {}
 
+--- Build a string out of the active neovim buffer
+---@return string string with all the content of the buffer
 function deps.buffer_to_string()
   local content = vim.api.nvim_buf_get_lines(0, 0, -1, false)
   return table.concat(content, '\n')
 end
 
+--- Get all the files that a .typ file depends open
+---@return table table containing the path of all dependencies files
 function deps.get_imports()
   deps.recursive_imports(vim.fn.expand('%:p'))
 
@@ -24,6 +28,9 @@ function deps.get_imports()
   return imports
 end
 
+--- Get all imports in a single file
+---@param file_path path of the file to parse
+---@return table table containing all imports
 function deps.get_imports_from_file(file_path)
   local pattern_reg = "#import%s?\"%g+\":"
   local import_reg = "%b\"\""
@@ -43,6 +50,8 @@ function deps.get_imports_from_file(file_path)
   return imports_table
 end
 
+--- Get required imports and the imports of those imports
+---@param import_str path to the base file
 function deps.recursive_imports(import_str)
   local iter_imports = {}
   if import_str ~= nil then
@@ -55,6 +64,10 @@ function deps.recursive_imports(import_str)
   end
 end
 
+--- Concatenate the value of a table to another
+---@param t1 first table
+---@param t2 second table
+---@return the first table with the content of the second table appended
 function deps.concat_tables(t1, t2)
   if t1 ~= nil and t2 ~= nil then
     for i = 1, #t2 do
@@ -64,17 +77,22 @@ function deps.concat_tables(t1, t2)
   return t1
 end
 
---- determine if package is global or a relative path
--- @param import_string the string inside the import statement in typst file
--- @return bool return true if global package
+--- Determine if the package is global or relative to the file
+---@param import_string the string with the import statement
+---@return bool true if the package is global
 function deps.is_global_package(import_string)
   if string.find(import_string, '@local') then
     return true
   else
     return false
   end
+
+  return false
 end
 
+--- Get full path from global or relative import statement
+---@param import_string the import statement
+---@return string string the full path of the file
 function deps.get_full_path(import_string)
   local path = ""
 
@@ -107,6 +125,9 @@ function deps.get_full_path(import_string)
   return path
 end
 
+--- Get entry point in typst.toml file in global packages
+---@param path path to the package directory
+---@return string string the path to the entry point of the global package
 function deps.add_entry_point(path)
   local toml = deps.read_file(path .. 'typst.toml')
 
@@ -127,6 +148,9 @@ function deps.add_entry_point(path)
   return path
 end
 
+--- Read a file and return it's content
+---@param path path to the file to read
+---@return string string of the whole content of the file
 function deps.read_file(path)
   local file = io.open(path, "r") -- r read mode and b binary mode
   if not file then return nil end

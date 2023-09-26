@@ -32,6 +32,7 @@ local k = require('luasnip.nodes.key_indexer').new_key
 
 
 
+--- setup the plugin
 function M.setup()
   local dependencies = deps.get_imports()
 
@@ -88,6 +89,9 @@ function M.setup()
   }
 end
 
+--- Create snippets from table with function name and arguments
+---@param arg table with .name and .args fields
+---@return table table with luasnip snippets
 function M.get_snip_from_arg(arg)
   local name = arg.name
   local args = arg.args
@@ -159,16 +163,14 @@ function M.get_snip_from_arg(arg)
     table.insert(expand_snip, t(')'))
   end
 
-
-
   table.insert(snip, s(name, expand_snip))
-
-
-
 
   return snip
 end
 
+--- Create a table with all the functions and argument from a file
+---@param path path to the file that will be parsed
+---@return table a table with .name field for function name and .args field which is a table with all arguments
 function M.get_functions(path)
   local file = deps.read_file(path)
   local functions = {}
@@ -214,6 +216,8 @@ function M.get_functions(path)
   return functions
 end
 
+--- Print the values in a table
+---@param table table to print
 function M.print_table(table)
   for _, value in pairs(table) do
     print(value)
