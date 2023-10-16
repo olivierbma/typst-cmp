@@ -97,7 +97,7 @@ function deps.get_full_path(import_string)
   local path = ""
 
   if deps.is_global_package(import_string) then
-    if vim.fn.has('Windows_NT') then
+    if jit.os == 'Windows' then
       import_string = string.gsub(import_string, "@local/", "")
 
       local package_name = string.gsub(import_string, "%p%d.%d.%d", "")
@@ -106,17 +106,18 @@ function deps.get_full_path(import_string)
           '\\appdata\\local' .. '\\typst\\packages\\local\\' .. package_name .. '\\' .. version .. '\\'
 
       path = deps.add_entry_point(path)
-    else
+    elseif jit.os == 'Linux' then
+      print('macunix')
       import_string = string.gsub(import_string, "@local/", "")
 
       local package_name = string.gsub(import_string, "%p%d.%d.%d", "")
       local version = string.gsub(import_string, "%a+:", "")
       path = vim.fn.expand('~') ..
-          '.loca/share' .. '/typst/packages/local/' .. "/" .. package_name .. '/' .. version
+          '/.local/share' .. '/typst/packages/local' .. "/" .. package_name .. '/' .. version .. '/'
       path = deps.add_entry_point(path)
     end
   else
-    if vim.fn.has('Windows_NT') then
+    if jit.os == 'Windows' then
       path = vim.fn.expand("%:p:h") .. '\\' .. import_string
     else
       path = vim.fn.expand("%:p:h") .. '/' .. import_string
@@ -131,11 +132,12 @@ end
 function deps.add_entry_point(path)
   local toml = deps.read_file(path .. 'typst.toml')
 
+  print(path .. 'typst.toml')
   for match in string.gmatch(toml, 'entrypoint%s*=%s%C+') do
     match = string.gsub(match, "entrypoint%s*=%s", "")
     match = string.gsub(match, '"', '')
 
-    if vim.fn.has('Windows_NT') then
+    if jit.os == 'Windows' then
       match = string.gsub(match, "/", "\\")
     end
 
