@@ -94,6 +94,7 @@ end
 ---@return table table with luasnip snippets
 function M.get_snip_from_arg(arg)
   local name = arg.name
+  name = string.gsub(name, '\r', '') -- fix for Unix to remove carriage returns if applicable
   local args = arg.args
   local jump_nb = 1
 
